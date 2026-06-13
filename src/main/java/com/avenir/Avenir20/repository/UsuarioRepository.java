@@ -13,5 +13,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // Buscar un usuario por su email (lo vamos a usar para el Login - UH-5)
     Optional<Usuario> findByEmail(String email);
 
-    Optional<Usuario> findByEmailAndContrasena(String email, String contrasena);
+
 }

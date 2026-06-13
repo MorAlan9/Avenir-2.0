@@ -27,19 +27,17 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean activo = true;
 
-    // --- LA MAGIA DE LA CLAVE FORÁNEA ---
-    // @ManyToOne: "Muchos" usuarios pueden tener "Un" mismo TipoPersona
-    // @JoinColumn: Le decimos cómo se va a llamar la columna en PostgreSQL
-    @ManyToOne
-    @JoinColumn(name = "id_tipo_persona", nullable = false)
-    private TipoPersona tipoPersona;
+
+    //@ManyToOne
+    //@JoinColumn(name = "id_tipo_persona", nullable = false)  //Esta linea se comenta hasta que agreguemos la gestion de permisos
+    private String tipoPersona;//Por lo mismo, hasta entonces tipoPersona será String
 
     // 1. Constructor vacío (Obligatorio para que Hibernate funcione)
     public Usuario() {
     }
 
     // 2. Constructor con todo (para crear usuarios rápidamente en el código)
-    public Usuario(String nombre, String apellido, String email, String contrasena, TipoPersona tipoPersona) {
+    public Usuario(String nombre, String apellido, String email, String contrasena, String tipoPersona) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
@@ -72,11 +70,11 @@ public class Usuario {
         this.apellido = apellido;
     }
 
-    public TipoPersona getTipoPersona() {
+    public String getTipoPersona() {
         return tipoPersona;
     }
 
-    public void setTipoPersona(TipoPersona tipoPersona) {
+    public void setTipoPersona(String tipoPersona) {
         this.tipoPersona = tipoPersona;
     }
 
