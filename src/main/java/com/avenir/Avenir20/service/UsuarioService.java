@@ -39,15 +39,18 @@ public class UsuarioService {
         return repository.findAll();
     }
     // Verifica credenciales
-    public boolean verificarCredenciales(Login login){
+    public Usuario obtenerUsuarioPorCredenciales(Login login){
         Optional<Usuario> usuarioOpt = repository.findByEmail(login.getEmail());
         if(usuarioOpt.isEmpty()){
-            return false;
+            return null;
         }else{
 
             String contrasenaHashed = usuarioOpt.get().getContrasena();
             Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
-            return argon2.verify(contrasenaHashed, login.getContrasena());
+            if(argon2.verify(contrasenaHashed, login.getContrasena())){
+                return usuarioOpt.get();
+            }
+            return null;
         }
     }
 }
