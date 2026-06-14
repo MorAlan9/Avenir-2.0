@@ -3,6 +3,7 @@ package com.avenir.Avenir20.controller;
 import com.avenir.Avenir20.model.Empresa;
 import com.avenir.Avenir20.service.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,23 +30,35 @@ public class EmpresaController {
         return empresa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: Registrar una nueva empresa
+    // POST: Registrar una nueva empresa con validación
     @PostMapping
-    public Empresa crear(@RequestBody Empresa empresa) {
-        return service.guardar(empresa);
+    public ResponseEntity<?> crear(@RequestBody Empresa empresa) {
+        try {
+            Empresa nuevaEmpresa = service.guardar(empresa);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEmpresa);
+        } catch (IllegalArgumentException e) {
+            // Ataja el error si el CUIT está repetido
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // PUT: Modificar datos de una empresa
     @PutMapping("/{id}")
-    public ResponseEntity<Empresa> actualizar(@PathVariable Long id, @RequestBody Empresa empresaDetalles) {
-        Optional<Empresa> empresaExistente = service.buscarPorId(id);
-        if (empresaExistente.isPresent()) {
-            Empresa empresa = empresaExistente.get();
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Empresa empresaDetalles) {
+        Optional<Empresa> empresaOpt = service.buscarPorId(id);
+        if (empresaOpt.isPresent()) {
+            Empresa empresa = empresaOpt.get();
             empresa.setNombre(empresaDetalles.getNombre());
             empresa.setCuit(empresaDetalles.getCuit());
             empresa.setDireccion(empresaDetalles.getDireccion());
-            // No tocamos el campo "activo" acá para no revivirla por error
-            return ResponseEntity.ok(service.guardar(empresa));
+
+            try {
+                // Intentamos guardar los cambios
+                return ResponseEntity.ok(service.guardar(empresa));
+            } catch (IllegalArgumentException e) {
+                // Si al editar le pusimos un CUIT que ya tiene otra empresa, atajamos el error
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
         }
         return ResponseEntity.notFound().build();
     }
