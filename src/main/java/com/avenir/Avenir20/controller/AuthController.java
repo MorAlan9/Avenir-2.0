@@ -37,6 +37,5 @@ public class AuthController {
             response.put("mensaje", "Credenciales inválidas");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-
     }
 }

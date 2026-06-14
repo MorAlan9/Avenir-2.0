@@ -16,6 +16,14 @@ public class EmpresaService {
 
     // US: Registrar empresa (y modificarla)
     public Empresa guardar(Empresa empresa) {
+        // Validación: Buscar si el CUIT ya existe en la base de datos
+        Optional<Empresa> empresaExistente = repository.findByCuit(empresa.getCuit());
+
+        // Si el CUIT existe Y NO es la misma empresa que estamos intentando editar
+        if (empresaExistente.isPresent() && !empresaExistente.get().getIdEmpresa().equals(empresa.getIdEmpresa())) {
+            throw new IllegalArgumentException("Ya existe una empresa registrada con este CUIT.");
+        }
+
         if (empresa.getIdEmpresa() == null) {
             empresa.setActivo(true); // Si es nueva, arranca activa por defecto
         }

@@ -22,29 +22,29 @@ public class Usuario {
     @Column(nullable = false)
     private String contrasena;
 
-    // Usamos esto para el "Borrado lógico" (UH-9)
-    // Por defecto, cuando creámos un usuario, está activo.
     @Column(nullable = false)
     private Boolean activo = true;
 
+    // ¡Acá está la magia habilitada!
+    @ManyToOne
+    @JoinColumn(name = "id_tipo_persona", nullable = false)
+    private TipoPersona tipoPersona;
 
-    //@ManyToOne
-    //@JoinColumn(name = "id_tipo_persona", nullable = false)  //Esta linea se comenta hasta que agreguemos la gestion de permisos
-    private String tipoPersona;//Por lo mismo, hasta entonces tipoPersona será String
-
-    // 1. Constructor vacío (Obligatorio para que Hibernate funcione)
+    // 1. Constructor vacío
     public Usuario() {
     }
 
-    // 2. Constructor con todo (para crear usuarios rápidamente en el código)
-    public Usuario(String nombre, String apellido, String email, String contrasena, String tipoPersona) {
+    // 2. Constructor con todo
+    public Usuario(String nombre, String apellido, String email, String contrasena, TipoPersona tipoPersona) {
         this.nombre = nombre;
         this.apellido = apellido;
         this.email = email;
         this.contrasena = contrasena;
         this.tipoPersona = tipoPersona;
-        this.activo = true; // Por defecto siempre activo
+        this.activo = true;
     }
+
+    // --- GETTERS Y SETTERS ---
 
     public Long getIdUsuario() {
         return idUsuario;
@@ -70,20 +70,12 @@ public class Usuario {
         this.apellido = apellido;
     }
 
-    public String getTipoPersona() {
-        return tipoPersona;
+    public String getEmail() {
+        return email;
     }
 
-    public void setTipoPersona(String tipoPersona) {
-        this.tipoPersona = tipoPersona;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getContrasena() {
@@ -94,13 +86,19 @@ public class Usuario {
         this.contrasena = contrasena;
     }
 
-    public String getEmail() {
-        return email;
+    public Boolean getActivo() {
+        return activo;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
     }
 
+    public TipoPersona getTipoPersona() {
+        return tipoPersona;
+    }
 
+    public void setTipoPersona(TipoPersona tipoPersona) {
+        this.tipoPersona = tipoPersona;
+    }
 }
