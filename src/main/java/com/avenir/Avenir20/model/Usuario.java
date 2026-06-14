@@ -101,4 +101,8 @@ public class Usuario {
     public void setTipoPersona(TipoPersona tipoPersona) {
         this.tipoPersona = tipoPersona;
     }
+
+    public Boolean isActivo() {
+        return this.activo;
+    }
 }

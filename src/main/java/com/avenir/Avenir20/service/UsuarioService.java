@@ -17,7 +17,7 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository repository;
 
-    // --- TU MÉTODO PARA EL REGISTRO (VALIDACIONES) ---
+    // --- MÉTODO PARA EL REGISTRO (VALIDACIONES) ---
     public Usuario guardar(Usuario usuario) {
         // Validar formato del Email
         if (usuario.getEmail() == null || !usuario.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
@@ -53,5 +53,43 @@ public class UsuarioService {
     // Listar todos los usuarios
     public List<Usuario> listarTodos() {
         return repository.findAll();
+    }
+
+    // --- NUEVO: Listar filtrando por Activo/Inactivo ---
+    public List<Usuario> listarPorEstado(boolean activo) {
+        return repository.findByActivo(activo);
+    }
+
+    // --- NUEVO: Modificar Usuario ---
+    public Usuario actualizar(Long id, Usuario datosNuevos) {
+        Optional<Usuario> usuarioExistente = repository.findById(id);
+
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+
+            // Actualizamos solo los datos permitidos (evitamos que modifiquen email y contraseña por acá)
+            usuario.setNombre(datosNuevos.getNombre());
+            usuario.setApellido(datosNuevos.getApellido());
+            usuario.setTipoPersona(datosNuevos.getTipoPersona());
+            // Si también quieren poder reactivar a alguien, actualizamos el estado:
+            usuario.setActivo(datosNuevos.isActivo());
+
+            return repository.save(usuario);
+        } else {
+            throw new IllegalArgumentException("Usuario no encontrado en la base de datos.");
+        }
+    }
+
+    // --- NUEVO: Dar de baja (Soft Delete) ---
+    public void darDeBaja(Long id) {
+        Optional<Usuario> usuarioExistente = repository.findById(id);
+
+        if (usuarioExistente.isPresent()) {
+            Usuario usuario = usuarioExistente.get();
+            usuario.setActivo(false); // Lo marcamos como inactivo
+            repository.save(usuario);
+        } else {
+            throw new IllegalArgumentException("Usuario no encontrado.");
+        }
     }
 }
