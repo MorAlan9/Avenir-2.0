@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/empresas")
+@CrossOrigin(origins = "*") // <-- ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA!
 public class EmpresaController {
 
     @Autowired
