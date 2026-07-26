@@ -17,8 +17,8 @@ public class CorsConfig {
         // Permitimos que pase el token y las credenciales
         config.setAllowCredentials(true);
 
-        // La URL exacta de tu React (
-        config.addAllowedOrigin("http://localhost:5173/");
+        // ✔️ Permitimos peticiones tanto de localhost como de la IP de tu celular o cualquier origen
+        config.addAllowedOriginPattern("*");
 
         // Permitimos todos los headers (Authorization, Content-Type, etc)
         config.addAllowedHeader("*");
