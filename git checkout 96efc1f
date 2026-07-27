@@ -1,0 +1,15 @@
+[33m96efc1f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: configuracion de api centralizada e integracion responsiva para movil
+[33m11008cf[m feat(sprint2): Registro de horas funcionando con email y CORS configurado
+[33m944aca4[m feat: CRUD completo de Usuarios y Roles, baja lógica y fix de IDs
+[33mea18bcb[m[33m ([m[1;31morigin/authUsuarios[m[33m, [m[1;32mauthUsuarios[m[33m)[m Merge pull request #3 from MorAlan9/feature/login-y-validaciones
+[33me29c927[m[33m ([m[1;31morigin/feature/login-y-validaciones[m[33m)[m feat: Integración de Login seguro, validaciones de usuario y CRUD completo de Empresas
+[33mc412b4d[m Encriptación de contraseña, autenticación de usuarios y sesiones de usuarios listas, todavía se puede mejorar los datos que envía al front cuando hay errores.
+[33m3c41512[m Arreglo del código base de autenticación, aún está pendiente de agregarle los tokens
+[33mf7413a4[m codigo base de autenticacion de prueba agregado, aunque aun no usa encriptación ni tokens así que luego será modificado
+[33mf691638[m Revert "Se colocó el aplication.properties en el gitigonre y dejó de ser trackeado por git, ya que contiene una variable que es diferente entre las máquinas, que es la contraseña al motor de base de datos"
+[33mbdb3a36[m Se colocó el aplication.properties en el gitigonre y dejó de ser trackeado por git, ya que contiene una variable que es diferente entre las máquinas, que es la contraseña al motor de base de datos
+[33m445b821[m[33m ([m[1;32mÂ-a[m[33m)[m Merge pull request #2 from MorAlan9/feature/alan-crudEmpresas
+[33m5ca4e96[m feat: CRUD de Empresas completo (alta, baja lógica, modificación y lectura)
+[33mae22adb[m Merge pull request #1 from MorAlan9/feature/alan
+[33mcc78eef[m UH-1 y UH-3: Creación de estructura base, .gitignore y módulos de Roles y Usuarios
+[33m837ea64[m[33m ([m[1;31morigin/feature/matias[m[33m, [m[1;31morigin/feature/mateo[m[33m)[m Comit inicial ÃÃ: Estructura base del proyecto
