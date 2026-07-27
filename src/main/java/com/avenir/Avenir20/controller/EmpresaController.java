@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/empresas")
-@CrossOrigin(origins = "*") // <-- ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA!
+@CrossOrigin(origins = "*")
 public class EmpresaController {
 
     @Autowired
@@ -31,19 +31,22 @@ public class EmpresaController {
         return empresa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: Registrar una nueva empresa con validación
+    // POST: Registrar una nueva empresa
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody Empresa empresa) {
         try {
+            // Aseguramos que si no envían estado, nazca activa por defecto
+            if (empresa.getActivo() == null) {
+                empresa.setActivo(true);
+            }
             Empresa nuevaEmpresa = service.guardar(empresa);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEmpresa);
         } catch (IllegalArgumentException e) {
-            // Ataja el error si el CUIT está repetido
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // PUT: Modificar datos de una empresa
+    // PUT: Modificar datos de una empresa (incluyendo su estado)
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Empresa empresaDetalles) {
         Optional<Empresa> empresaOpt = service.buscarPorId(id);
@@ -53,23 +56,38 @@ public class EmpresaController {
             empresa.setCuit(empresaDetalles.getCuit());
             empresa.setDireccion(empresaDetalles.getDireccion());
 
+            // 🔹 Código limpio: Si viene el campo 'activo', lo actualizamos
+            if (empresaDetalles.getActivo() != null) {
+                empresa.setActivo(empresaDetalles.getActivo());
+            }
+
             try {
-                // Intentamos guardar los cambios
                 return ResponseEntity.ok(service.guardar(empresa));
             } catch (IllegalArgumentException e) {
-                // Si al editar le pusimos un CUIT que ya tiene otra empresa, atajamos el error
                 return ResponseEntity.badRequest().body(e.getMessage());
             }
         }
         return ResponseEntity.notFound().build();
     }
 
-    // PATCH: Dar de baja una empresa (Borrado lógico)
+    // PATCH: Dar de baja una empresa
     @PatchMapping("/{id}/baja")
     public ResponseEntity<Empresa> darDeBaja(@PathVariable Long id) {
         Empresa empresa = service.darDeBaja(id);
         if (empresa != null) {
             return ResponseEntity.ok(empresa);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // PATCH: Dar de alta una empresa (NUEVO ENDPOINT)
+    @PatchMapping("/{id}/alta")
+    public ResponseEntity<Empresa> darDeAlta(@PathVariable Long id) {
+        Optional<Empresa> empresaOpt = service.buscarPorId(id);
+        if (empresaOpt.isPresent()) {
+            Empresa empresa = empresaOpt.get();
+            empresa.setActivo(true);
+            return ResponseEntity.ok(service.guardar(empresa));
         }
         return ResponseEntity.notFound().build();
     }
