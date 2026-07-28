@@ -1,12 +1,15 @@
 package com.avenir.Avenir20.service;
 
+import com.avenir.Avenir20.dto.TipoPersonaDTO;
+import com.avenir.Avenir20.model.Permiso;
 import com.avenir.Avenir20.model.TipoPersona;
+import com.avenir.Avenir20.repository.PermisoRepository;
 import com.avenir.Avenir20.repository.TipoPersonaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TipoPersonaService {
@@ -14,34 +17,53 @@ public class TipoPersonaService {
     @Autowired
     private TipoPersonaRepository repository;
 
-    // Guardar un nuevo rol en la base de datos
-    public TipoPersona guardar(TipoPersona tipoPersona) {
-        return repository.save(tipoPersona);
-    }
+    @Autowired
+    private PermisoRepository permisoRepository;
 
-    // Listar todos los roles
     public List<TipoPersona> listarTodos() {
         return repository.findAll();
     }
 
-    // NUEVO: Modificar un rol
-    public TipoPersona actualizar(Long id, TipoPersona datosNuevos) {
-        Optional<TipoPersona> existente = repository.findById(id);
-        if (existente.isPresent()) {
-            TipoPersona rol = existente.get();
-            rol.setNombre(datosNuevos.getNombre());
-            return repository.save(rol);
+    public TipoPersona guardarConPermisos(TipoPersonaDTO dto) {
+        TipoPersona nuevoRol = new TipoPersona();
+        nuevoRol.setNombre(dto.getNombre());
+
+        if (dto.getPermisosIds() != null && !dto.getPermisosIds().isEmpty()) {
+            List<Permiso> permisosEncontrados = permisoRepository.findAllById(dto.getPermisosIds());
+            nuevoRol.setPermisos(new HashSet<>(permisosEncontrados));
         } else {
-            throw new IllegalArgumentException("Rol no encontrado en la base de datos.");
+            nuevoRol.setPermisos(new HashSet<>());
         }
+
+        return repository.save(nuevoRol);
     }
 
-    // NUEVO: Eliminar un rol
-    public void eliminar(Long id) {
-        if (repository.existsById(id)) {
-            repository.deleteById(id);
+    public TipoPersona actualizarConPermisos(Long id, TipoPersonaDTO dto) {
+        TipoPersona existente = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El rol no existe en la base de datos."));
+
+        existente.setNombre(dto.getNombre());
+
+        if (dto.getPermisosIds() != null) {
+            List<Permiso> permisosEncontrados = permisoRepository.findAllById(dto.getPermisosIds());
+            existente.setPermisos(new HashSet<>(permisosEncontrados));
         } else {
-            throw new IllegalArgumentException("Rol no encontrado.");
+            existente.setPermisos(new HashSet<>());
         }
+
+        return repository.save(existente);
+    }
+
+    // 👇 MÉTODO ELIMINAR BLINDADO
+    public void eliminar(Long id) {
+        TipoPersona rol = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("El rol no existe."));
+
+        // 1. Vaciamos la lista de permisos para que Hibernate borre la relación de la tabla intermedia
+        rol.getPermisos().clear();
+        repository.save(rol);
+
+        // 2. Ahora sí, borramos el rol tranquilamente
+        repository.delete(rol);
     }
 }
