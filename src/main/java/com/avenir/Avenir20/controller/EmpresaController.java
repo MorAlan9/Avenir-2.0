@@ -5,6 +5,7 @@ import com.avenir.Avenir20.service.EmpresaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,27 +19,24 @@ public class EmpresaController {
     @Autowired
     private EmpresaService service;
 
-    // GET: Listar todas las empresas
     @GetMapping
+    @PreAuthorize("hasAuthority('VER_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public List<Empresa> listar() {
         return service.listarTodas();
     }
 
-    // GET: Buscar una empresa específica por ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('VER_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<Empresa> buscarPorId(@PathVariable Long id) {
         Optional<Empresa> empresa = service.buscarPorId(id);
         return empresa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // POST: Registrar una nueva empresa
     @PostMapping
+    @PreAuthorize("hasAuthority('CREAR_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> crear(@RequestBody Empresa empresa) {
         try {
-            // Aseguramos que si no envían estado, nazca activa por defecto
-            if (empresa.getActivo() == null) {
-                empresa.setActivo(true);
-            }
+            if (empresa.getActivo() == null) empresa.setActivo(true);
             Empresa nuevaEmpresa = service.guardar(empresa);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevaEmpresa);
         } catch (IllegalArgumentException e) {
@@ -46,8 +44,8 @@ public class EmpresaController {
         }
     }
 
-    // PUT: Modificar datos de una empresa (incluyendo su estado)
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('EDITAR_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Empresa empresaDetalles) {
         Optional<Empresa> empresaOpt = service.buscarPorId(id);
         if (empresaOpt.isPresent()) {
@@ -55,11 +53,7 @@ public class EmpresaController {
             empresa.setNombre(empresaDetalles.getNombre());
             empresa.setCuit(empresaDetalles.getCuit());
             empresa.setDireccion(empresaDetalles.getDireccion());
-
-            // 🔹 Código limpio: Si viene el campo 'activo', lo actualizamos
-            if (empresaDetalles.getActivo() != null) {
-                empresa.setActivo(empresaDetalles.getActivo());
-            }
+            if (empresaDetalles.getActivo() != null) empresa.setActivo(empresaDetalles.getActivo());
 
             try {
                 return ResponseEntity.ok(service.guardar(empresa));
@@ -70,18 +64,16 @@ public class EmpresaController {
         return ResponseEntity.notFound().build();
     }
 
-    // PATCH: Dar de baja una empresa
     @PatchMapping("/{id}/baja")
+    @PreAuthorize("hasAuthority('DAR_DE_BAJA_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<Empresa> darDeBaja(@PathVariable Long id) {
         Empresa empresa = service.darDeBaja(id);
-        if (empresa != null) {
-            return ResponseEntity.ok(empresa);
-        }
+        if (empresa != null) return ResponseEntity.ok(empresa);
         return ResponseEntity.notFound().build();
     }
 
-    // PATCH: Dar de alta una empresa (NUEVO ENDPOINT)
     @PatchMapping("/{id}/alta")
+    @PreAuthorize("hasAuthority('EDITAR_EMPRESAS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<Empresa> darDeAlta(@PathVariable Long id) {
         Optional<Empresa> empresaOpt = service.buscarPorId(id);
         if (empresaOpt.isPresent()) {

@@ -23,11 +23,11 @@ public class Usuario {
     private String contrasena;
 
     @Column(nullable = false)
-    private Boolean activo = true;
+    private Boolean activo = false;
 
-    // ¡Acá está la magia habilitada!
-    @ManyToOne
-    @JoinColumn(name = "id_tipo_persona", nullable = false)
+    // 🌟 PLAN A APLICADO: Habilitamos valores nulos para el registro de usuarios estándar
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "id_tipo_persona", nullable = true)
     private TipoPersona tipoPersona;
 
     // 1. Constructor vacío

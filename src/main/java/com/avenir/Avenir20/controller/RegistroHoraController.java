@@ -5,6 +5,7 @@ import com.avenir.Avenir20.service.RegistroHoraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,10 +21,11 @@ public class RegistroHoraController {
     private RegistroHoraService service;
 
     @PostMapping("/registrar")
+    @PreAuthorize("hasAuthority('REGISTRAR_HORARIOS') or hasAuthority('CREAR_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> registrarHora(@RequestBody Map<String, Object> payload) {
         try {
             Long idEmpresa = Long.valueOf(payload.get("idEmpresa").toString());
-            String emailUsuario = payload.get("emailUsuario").toString(); // <--- Recibimos email
+            String emailUsuario = payload.get("emailUsuario").toString();
             LocalDate fecha = LocalDate.parse(payload.get("fecha").toString());
             Double horas = Double.valueOf(payload.get("horasDedicadas").toString());
             String tareas = payload.get("tareasRealizadas").toString();
@@ -33,14 +35,13 @@ public class RegistroHoraController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace(); // Esto te dirá el error exacto en la consola
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error procesando los datos.");
         }
     }
 
-    // GET: Molde del calendario - Devuelve todos los usuarios que registraron horas en X fecha
-    // Ejemplo de uso: /api/horas/calendario?fecha=2026-06-30
     @GetMapping("/calendario")
+    @PreAuthorize("hasAuthority('VER_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<List<RegistroHora>> obtenerPorFecha(@RequestParam String fecha) {
         LocalDate fechaBuscada = LocalDate.parse(fecha);
         List<RegistroHora> registros = service.buscarPorFecha(fechaBuscada);

@@ -8,6 +8,7 @@ import com.avenir.Avenir20.service.TipoPersonaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,16 +24,15 @@ public class TipoPersonaController {
     @Autowired
     private PermisoRepository permisoRepository;
 
-    // GET: Traer todos los permisos
     @GetMapping("/permisos")
+    @PreAuthorize("hasAuthority('VER_ROLES') or hasAuthority('VER_USUARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public List<Permiso> listarPermisosDisponibles() {
         return permisoRepository.findAll();
     }
 
-    // 👇 NUEVO: POST para crear un permiso suelto desde el frontend
     @PostMapping("/permisos")
+    @PreAuthorize("hasAuthority('CREAR_ROLES') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<Permiso> crearPermiso(@RequestBody Permiso nuevoPermiso) {
-        // Formateamos el texto para que quede en mayúsculas y con guiones bajos (ej: VER REPORTES -> VER_REPORTES)
         String nombreFormateado = nuevoPermiso.getNombre().trim().toUpperCase().replace(" ", "_");
         nuevoPermiso.setNombre(nombreFormateado);
         nuevoPermiso.setActivo(true);
@@ -42,17 +42,20 @@ public class TipoPersonaController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('VER_ROLES') or hasAuthority('ROLE_ADMINISTRADOR')")
     public List<TipoPersona> listar() {
         return service.listarTodos();
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CREAR_ROLES') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<TipoPersona> crear(@RequestBody TipoPersonaDTO dto) {
         TipoPersona nuevoRol = service.guardarConPermisos(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoRol);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('EDITAR_ROLES') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody TipoPersonaDTO dto) {
         try {
             TipoPersona actualizado = service.actualizarConPermisos(id, dto);
@@ -63,6 +66,7 @@ public class TipoPersonaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DAR_DE_BAJA_ROLES') or hasAuthority('ELIMINAR_ROLES') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
             service.eliminar(id);

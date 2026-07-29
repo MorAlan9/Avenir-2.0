@@ -10,14 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.spec.SecretKeySpec;
 import jakarta.xml.bind.DatatypeConverter;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
-/**
- * @author Mahesh
- */
 @Component
 public class JWTUtil {
 
@@ -33,23 +30,35 @@ public class JWTUtil {
     private final Logger log = LoggerFactory.getLogger(JWTUtil.class);
 
     /**
-     * Crear un nuevo token.
+     * Crear un nuevo token simple.
      */
     public String create(String id, String subject) {
-        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+        return createConPermisosYRol(id, subject, List.of(), "SIN_ROL");
+    }
 
+    /**
+     * Crear un token con permisos pero sin rol explícito.
+     */
+    public String createConPermisos(String id, String subject, List<String> permisos) {
+        return createConPermisosYRol(id, subject, permisos, "SIN_ROL");
+    }
+
+    /**
+     * 🌟 MÉTODOS COMPLETO: Crear token JWT incluyendo Permisos y el Rol.
+     */
+    public String createConPermisosYRol(String id, String subject, List<String> permisos, String rol) {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
-
-        // Generar la clave de firma
         Key signingKey = Keys.hmacShaKeyFor(DatatypeConverter.parseBase64Binary(key));
 
-        // Construir el JWT
         JwtBuilder builder = Jwts.builder()
                 .setId(id)
                 .setIssuedAt(now)
                 .setSubject(subject)
                 .setIssuer(issuer)
+                .claim("permisos", permisos)
+                .claim("rol", rol) // 👈 Embebemos el rol en las claims
                 .signWith(signingKey, signatureAlgorithm);
 
         if (ttlMillis >= 0) {
@@ -62,7 +71,7 @@ public class JWTUtil {
     }
 
     /**
-     * Validar y leer el JWT (subject).
+     * Validar y obtener el Subject (email / username) del Token.
      */
     public String getValue(String jwt) {
         Key signingKey = Keys.hmacShaKeyFor(DatatypeConverter.parseBase64Binary(key));
@@ -76,7 +85,7 @@ public class JWTUtil {
     }
 
     /**
-     * Validar y leer el JWT (id).
+     * Validar y obtener el ID del usuario guardado en el Token.
      */
     public String getKey(String jwt) {
         Key signingKey = Keys.hmacShaKeyFor(DatatypeConverter.parseBase64Binary(key));

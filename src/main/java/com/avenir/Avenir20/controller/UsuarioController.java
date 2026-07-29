@@ -1,16 +1,25 @@
 package com.avenir.Avenir20.controller;
 
+import com.avenir.Avenir20.model.Permiso;
+import com.avenir.Avenir20.model.TipoPersona;
 import com.avenir.Avenir20.model.Usuario;
 import com.avenir.Avenir20.model.UsuarioRequest;
+import com.avenir.Avenir20.repository.TipoPersonaRepository;
 import com.avenir.Avenir20.service.UsuarioService;
+import com.avenir.Avenir20.utils.JWTUtil;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -20,49 +29,110 @@ public class UsuarioController {
     @Autowired
     private UsuarioService service;
 
-    // GET: Trae la lista de todos los usuarios (o filtra si se envía ?activo=true/false)
+    @Autowired
+    private TipoPersonaRepository tipoPersonaRepository;
+
+    @Autowired
+    private JWTUtil jwtUtil;
+
+    // GET: Listar todos los usuarios
     @GetMapping
+    @PreAuthorize("hasAuthority('VER_USUARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<List<Usuario>> listar(@RequestParam(required = false) Boolean activo) {
         if (activo != null) {
-            return ResponseEntity.ok(service.listarPorEstado(activo)); // Retorna filtrados
+            return ResponseEntity.ok(service.listarPorEstado(activo));
         }
-        return ResponseEntity.ok(service.listarTodos()); // Retorna todos
+        return ResponseEntity.ok(service.listarTodos());
     }
 
-    // POST: Crea un usuario nuevo usando el envoltorio UsuarioRequest
+    // POST: Registro público (Soporta Admins con clave y Empleados sin clave)
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody UsuarioRequest request) {
         try {
-            // 1. Validar la clave de acceso que manda el Front
-            if (request.getClaveAcceso() == null || !request.getClaveAcceso().equals("000010001")) {
-                return ResponseEntity.badRequest().body("Clave de acceso incorrecta o no proporcionada.");
+            if (request == null || request.getUsuario() == null) {
+                return ResponseEntity.badRequest().body("Los datos del usuario son obligatorios.");
             }
 
-            // 2. Extraer el usuario limpio del envoltorio
             Usuario usuario = request.getUsuario();
-
-            // 3. Validar longitud de la contraseña ANTES de encriptarla
             String contrasenaPlana = usuario.getContrasena();
+
             if (contrasenaPlana == null || contrasenaPlana.length() < 6) {
                 return ResponseEntity.badRequest().body("La contraseña debe tener al menos 6 caracteres.");
             }
 
-            // 4. Encriptar con Argon2
+            // Encriptación con Argon2
             Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
             String hash = argon2.hash(3, 1024, 1, contrasenaPlana);
             usuario.setContrasena(hash);
 
-            // 5. Guardar usando el Service
+            // Validar clave máster de Administrador
+            boolean esAdmin = request.getClaveAcceso() != null && "000010001".equals(request.getClaveAcceso().trim());
+
+            String nombreRol;
+            List<String> permisosNombres = new ArrayList<>();
+
+            if (esAdmin) {
+                // Es Admin: Nace ACTIVO y con Rol ADMINISTRADOR
+                TipoPersona rolAdmin = tipoPersonaRepository.findByNombre("ADMINISTRADOR")
+                        .orElseGet(() -> tipoPersonaRepository.findById(1L).orElse(null));
+
+                usuario.setTipoPersona(rolAdmin);
+                usuario.setActivo(true);
+
+                // 🌟 CLAVE: Forzamos el nombre del rol en mayúsculas
+                nombreRol = "ADMINISTRADOR";
+
+                if (rolAdmin != null && rolAdmin.getPermisos() != null) {
+                    permisosNombres = rolAdmin.getPermisos().stream()
+                            .map(Permiso::getNombre)
+                            .collect(Collectors.toList());
+                }
+            } else {
+                // Es Estándar: Nace INACTIVO y con Rol PENDIENTE
+                usuario.setActivo(false);
+
+                TipoPersona rolPendiente = tipoPersonaRepository.findByNombre("PENDIENTE")
+                        .orElseGet(() -> tipoPersonaRepository.findByNombre("SIN_ROL")
+                                .orElseGet(() -> tipoPersonaRepository.findById(2L).orElse(null)));
+
+                usuario.setTipoPersona(rolPendiente);
+                nombreRol = (rolPendiente != null) ? rolPendiente.getNombre().toUpperCase() : "PENDIENTE";
+            }
+
+            // Guardar usuario en BD
             Usuario nuevoUsuario = service.guardar(usuario);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+
+            // Generar Token JWT con el ROL y Permisos
+            String tokenJwt = jwtUtil.createConPermisosYRol(
+                    String.valueOf(nuevoUsuario.getIdUsuario()),
+                    nuevoUsuario.getEmail(),
+                    permisosNombres,
+                    nombreRol
+            );
+
+            // Armar respuesta JSON
+            Map<String, Object> response = new HashMap<>();
+            response.put("usuario", nuevoUsuario);
+            response.put("token", tokenJwt);
+            response.put("rol", nombreRol);
+            response.put("permisos", permisosNombres);
+            response.put("mensaje", esAdmin
+                    ? "Cuenta de Administrador registrada y activada con éxito."
+                    : "Usuario registrado con éxito. Su cuenta está pendiente de aprobación.");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al procesar el registro de usuario: " + e.getMessage());
         }
     }
 
-    // PUT: Modificar un usuario existente
+    // PUT: Actualizar usuario (Aprobar, cambiar rol, editar datos)
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('EDITAR_USUARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Usuario usuario) {
         try {
             Usuario actualizado = service.actualizar(id, usuario);
@@ -72,8 +142,9 @@ public class UsuarioController {
         }
     }
 
-    // DELETE: Dar de baja lógica a un usuario
+    // DELETE: Dar de baja a un usuario
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DAR_DE_BAJA_USUARIOS') or hasAuthority('ELIMINAR_USUARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
     public ResponseEntity<?> darDeBaja(@PathVariable Long id) {
         try {
             service.darDeBaja(id);
