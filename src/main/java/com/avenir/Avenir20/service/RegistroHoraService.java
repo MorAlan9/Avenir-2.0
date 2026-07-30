@@ -28,7 +28,6 @@ public class RegistroHoraService {
     // US: Registrar horas trabajadas
     public RegistroHora guardarRegistro(Long idEmpresa, String emailUsuario, LocalDate fecha, Double horas, String tareas) {
         Optional<Empresa> empresaOpt = empresaRepository.findById(idEmpresa);
-        // Buscamos al usuario por el EMAIL
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(emailUsuario);
 
         if (empresaOpt.isEmpty()) {
@@ -45,11 +44,28 @@ public class RegistroHoraService {
         registro.setHorasDedicadas(horas);
         registro.setTareasRealizadas(tareas);
 
+        // Nace en estado PENDIENTE por defecto
+        registro.setEstado("PENDIENTE");
+
         return registroHoraRepository.save(registro);
     }
 
     // US: Calendario - Ver registros de un día específico
     public List<RegistroHora> buscarPorFecha(LocalDate fecha) {
         return registroHoraRepository.findByFecha(fecha);
+    }
+
+    // 🌟 Actualizar el estado de la hora (APROBADO / RECHAZADO)
+    public RegistroHora actualizarEstado(Long idRegistro, String nuevoEstado) {
+        Optional<RegistroHora> registroOpt = registroHoraRepository.findById(idRegistro);
+
+        if (registroOpt.isEmpty()) {
+            throw new IllegalArgumentException("Registro de hora no encontrado con el ID: " + idRegistro);
+        }
+
+        RegistroHora registro = registroOpt.get();
+        registro.setEstado(nuevoEstado.toUpperCase());
+
+        return registroHoraRepository.save(registro);
     }
 }

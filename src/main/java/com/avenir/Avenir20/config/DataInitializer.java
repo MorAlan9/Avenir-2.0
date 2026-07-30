@@ -18,18 +18,21 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Si no hay permisos en la BD, creamos los iniciales
-        if (permisoRepository.count() == 0) {
-            List<String> nombresPermisos = List.of(
-                    "VER_USUARIOS", "CREAR_USUARIOS", "EDITAR_USUARIOS", "ELIMINAR_USUARIOS",
-                    "VER_EMPRESAS", "CREAR_EMPRESAS", "EDITAR_EMPRESAS", "ELIMINAR_EMPRESAS",
-                    "VER_HORARIOS", "REGISTRAR_HORARIOS"
-            );
+        // 🌟 Lista completa de permisos requeridos por el sistema
+        List<String> nombresPermisos = List.of(
+                "VER_USUARIOS", "CREAR_USUARIOS", "EDITAR_USUARIOS", "ELIMINAR_USUARIOS",
+                "VER_ROLES", "CREAR_ROLES", "EDITAR_ROLES", "ELIMINAR_ROLES",
+                "VER_EMPRESAS", "CREAR_EMPRESAS", "EDITAR_EMPRESAS", "ELIMINAR_EMPRESAS",
+                "VER_HORARIOS", "REGISTRAR_HORARIOS", "APROBAR_HORARIOS" // 👈 Aseguramos APROBAR_HORARIOS
+        );
 
-            for (String nombre : nombresPermisos) {
+        // 🚀 Verificamos uno por uno para agregar únicamente los faltantes sin duplicar
+        for (String nombre : nombresPermisos) {
+            boolean existe = permisoRepository.existsByNombre(nombre);
+            if (!existe) {
                 permisoRepository.save(new Permiso(nombre));
+                System.out.println("✅ Permiso creado automáticamente en PostgreSQL: " + nombre);
             }
-            System.out.println("✅ Permisos iniciales cargados con éxito en la Base de Datos.");
         }
     }
 }

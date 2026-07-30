@@ -29,6 +29,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/usuarios/login", "/api/roles/permisos").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
 
+                        // ⏰ HABILITAMOS MÉTODOS DE MODIFICACIÓN DE HORARIOS PARA AUTENTICADOS
+                        .requestMatchers(HttpMethod.PATCH, "/api/horas/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/horas/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/horas/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/horas/**").authenticated()
+
                         // 🔒 Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated()
                 )

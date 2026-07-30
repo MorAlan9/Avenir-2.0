@@ -78,8 +78,6 @@ public class UsuarioController {
 
                 usuario.setTipoPersona(rolAdmin);
                 usuario.setActivo(true);
-
-                // 🌟 CLAVE: Forzamos el nombre del rol en mayúsculas
                 nombreRol = "ADMINISTRADOR";
 
                 if (rolAdmin != null && rolAdmin.getPermisos() != null) {
@@ -88,15 +86,20 @@ public class UsuarioController {
                             .collect(Collectors.toList());
                 }
             } else {
-                // Es Estándar: Nace INACTIVO y con Rol PENDIENTE
+                // 🛑 Es Estándar: Forzamos INACTIVO y creamos o buscamos un rol neutro "PENDIENTE"
                 usuario.setActivo(false);
 
                 TipoPersona rolPendiente = tipoPersonaRepository.findByNombre("PENDIENTE")
                         .orElseGet(() -> tipoPersonaRepository.findByNombre("SIN_ROL")
-                                .orElseGet(() -> tipoPersonaRepository.findById(2L).orElse(null)));
+                                .orElseGet(() -> {
+                                    // En vez de usar el ID 2 (que puede ser Gerente), creamos un rol neutro "PENDIENTE"
+                                    TipoPersona nuevo = new TipoPersona();
+                                    nuevo.setNombre("PENDIENTE");
+                                    return tipoPersonaRepository.save(nuevo);
+                                }));
 
                 usuario.setTipoPersona(rolPendiente);
-                nombreRol = (rolPendiente != null) ? rolPendiente.getNombre().toUpperCase() : "PENDIENTE";
+                nombreRol = "PENDIENTE";
             }
 
             // Guardar usuario en BD

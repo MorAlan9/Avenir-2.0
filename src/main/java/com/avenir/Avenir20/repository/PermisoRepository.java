@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PermisoRepository extends JpaRepository<Permiso, Long> {
+    boolean existsByNombre(String nombre);
 }

@@ -21,7 +21,7 @@ public class RegistroHoraController {
     private RegistroHoraService service;
 
     @PostMapping("/registrar")
-    @PreAuthorize("hasAuthority('REGISTRAR_HORARIOS') or hasAuthority('CREAR_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> registrarHora(@RequestBody Map<String, Object> payload) {
         try {
             Long idEmpresa = Long.valueOf(payload.get("idEmpresa").toString());
@@ -41,10 +41,43 @@ public class RegistroHoraController {
     }
 
     @GetMapping("/calendario")
-    @PreAuthorize("hasAuthority('VER_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<RegistroHora>> obtenerPorFecha(@RequestParam String fecha) {
         LocalDate fechaBuscada = LocalDate.parse(fecha);
         List<RegistroHora> registros = service.buscarPorFecha(fechaBuscada);
         return ResponseEntity.ok(registros);
+    }
+
+    // 🌟 ENDPOINT PARA CAMBIAR EL ESTADO (APROBAR / RECHAZAR) VIA BODY JSON
+    @PutMapping("/{id}/estado")
+    @PreAuthorize("hasAuthority('APROBAR_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR') or hasAuthority('ADMINISTRADOR')")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        try {
+            String nuevoEstado = body.get("estado");
+            if (nuevoEstado == null || nuevoEstado.isEmpty()) {
+                return ResponseEntity.badRequest().body("El estado es obligatorio.");
+            }
+
+            service.actualizarEstado(id, nuevoEstado);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el estado de las horas.");
+        }
+    }
+
+    // 🌟 ENDPOINT ALTERNATIVO VIA QUERY PARAM
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasAuthority('APROBAR_HORARIOS') or hasAuthority('ROLE_ADMINISTRADOR') or hasAuthority('ADMINISTRADOR')")
+    public ResponseEntity<?> cambiarEstadoPatch(@PathVariable Long id, @RequestParam String estado) {
+        try {
+            service.actualizarEstado(id, estado);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al actualizar el estado.");
+        }
     }
 }
