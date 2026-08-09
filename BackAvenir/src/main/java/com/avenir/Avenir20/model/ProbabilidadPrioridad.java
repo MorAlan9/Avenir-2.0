@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class ProbabilidadPrioridad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String nombre;
     private boolean activo;
 
@@ -15,7 +15,7 @@ public class ProbabilidadPrioridad {
 
     //GETTERS
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -28,7 +28,7 @@ public class ProbabilidadPrioridad {
     }
     //SETTERS
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

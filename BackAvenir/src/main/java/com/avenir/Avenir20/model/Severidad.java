@@ -3,18 +3,18 @@ package com.avenir.Avenir20.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "categoria_riesgo")
-public class CategoriaRiesgo {
-
+@Table(name = "severidad")
+public class Severidad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
     private boolean activo;
 
-    public CategoriaRiesgo(){}
+    public Severidad(){}
 
     //GETTERS
+
     public Long getId() {
         return id;
     }
@@ -28,6 +28,7 @@ public class CategoriaRiesgo {
     }
 
     //SETTERS
+
     public void setId(Long id) {
         this.id = id;
     }

@@ -1,21 +1,20 @@
 package com.avenir.Avenir20.model;
 
 import jakarta.persistence.*;
-import org.hibernate.property.access.internal.AbstractSetterMethodSerialForm;
 
 @Entity
 @Table(name = "causa_riesgo")
 public class CausaRiesgo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
     private String nombre;
     private boolean activo;
 
     public CausaRiesgo(){}
 
     //GETTERS
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -28,7 +27,7 @@ public class CausaRiesgo {
     }
     //SETTERS
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

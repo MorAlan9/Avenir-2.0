@@ -10,28 +10,54 @@ public class IperFormulario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-    private int idresponsable;//Esta variable sería para facilitar el envío a la base de datos.
+    private Long id;
+    @ManyToOne
+    @JoinColumn(name = "responsable_id", nullable = false)
+    private Usuario responsable;//Esta variable sería para facilitar el envío a la base de datos.
     private LocalDate fecha;
     private String turno;
-    private String empresa;
-    private String estado;
-    private String tipoRiesgo;
+    @ManyToOne
+    @JoinColumn(name = "empresa_id", nullable = false)
+    private Empresa empresa;
+    @ManyToOne
+    @JoinColumn(name = "estado_id", nullable = false)
+    private Estado estado;
+    @ManyToOne
+    @JoinColumn(name = "tipoRiesgo_id", nullable = false)
+    private TipoRiesgo tipoRiesgo;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String descripcionRiesgo;
-    private String causaRiesgo;
+    @ManyToOne
+    @JoinColumn(name = "causaRiesgo_id", nullable = false)
+    private CausaRiesgo causaRiesgo;
     private String sector;
-    private String categoriaRiesgo;
-    private String nivelRiesgo;
+    @ManyToOne
+    @JoinColumn(name = "categoriaRiesgo_id", nullable = false)
+    private CategoriaRiesgo categoriaRiesgo;
+    @ManyToOne
+    @JoinColumn(name = "nivelRiesgo_id", nullable = false)
+    private Severidad nivelRiesgo;
     private Boolean existenMedidas;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String descripcionMedidas;
-    private String impactoPotencialRiesgo;
-    private String probabilidadOcurrencia;
-    private String prioridadRiesgo;
+    @ManyToOne
+    @JoinColumn(name = "impactoPotencialRiesgo_id", nullable = false)
+    private Severidad impactoPotencialRiesgo;
+    private ProbabilidadPrioridad probabilidadOcurrencia;
+    private ProbabilidadPrioridad prioridadRiesgo;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String accionesSugeridas;
     private String responsableDeAcciones;
     private LocalDate fechaAlternativaImplementacion;
     private String riesgoEliminado;
-    private String impactoResidual;
+    @ManyToOne
+    @JoinColumn(name = "impactoResidual_id", nullable = false)
+    private ProbabilidadPrioridad impactoResidual;
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String comentario;
     private LocalDate fechaCierre;
     private String nombreArchivo;
@@ -41,12 +67,12 @@ public class IperFormulario {
 
     //GETTERS
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public int getIdresponsable() {
-        return idresponsable;
+    public Usuario getResponsable() {
+        return responsable;
     }
 
     public LocalDate getFecha() {
@@ -57,15 +83,15 @@ public class IperFormulario {
         return turno;
     }
 
-    public String getEmpresa() {
+    public Empresa getEmpresa() {
         return empresa;
     }
 
-    public String getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 
-    public String getTipoRiesgo() {
+    public TipoRiesgo getTipoRiesgo() {
         return tipoRiesgo;
     }
 
@@ -73,7 +99,7 @@ public class IperFormulario {
         return descripcionRiesgo;
     }
 
-    public String getCausaRiesgo() {
+    public CausaRiesgo getCausaRiesgo() {
         return causaRiesgo;
     }
 
@@ -81,11 +107,11 @@ public class IperFormulario {
         return sector;
     }
 
-    public String getCategoriaRiesgo() {
+    public CategoriaRiesgo getCategoriaRiesgo() {
         return categoriaRiesgo;
     }
 
-    public String getNivelRiesgo() {
+    public Severidad getNivelRiesgo() {
         return nivelRiesgo;
     }
 
@@ -97,15 +123,15 @@ public class IperFormulario {
         return descripcionMedidas;
     }
 
-    public String getImpactoPotencialRiesgo() {
+    public Severidad getImpactoPotencialRiesgo() {
         return impactoPotencialRiesgo;
     }
 
-    public String getProbabilidadOcurrencia() {
+    public ProbabilidadPrioridad getProbabilidadOcurrencia() {
         return probabilidadOcurrencia;
     }
 
-    public String getPrioridadRiesgo() {
+    public ProbabilidadPrioridad getPrioridadRiesgo() {
         return prioridadRiesgo;
     }
 
@@ -125,7 +151,7 @@ public class IperFormulario {
         return riesgoEliminado;
     }
 
-    public String getImpactoResidual() {
+    public ProbabilidadPrioridad getImpactoResidual() {
         return impactoResidual;
     }
 
@@ -147,12 +173,12 @@ public class IperFormulario {
 
     //SETTERS
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public void setIdresponsable(int idresponsable) {
-        this.idresponsable = idresponsable;
+    public void setResponsable(Usuario responsable) {
+        this.responsable = responsable;
     }
 
     public void setFecha(LocalDate fecha) {
@@ -163,15 +189,15 @@ public class IperFormulario {
         this.turno = turno;
     }
 
-    public void setEmpresa(String empresa) {
+    public void setEmpresa(Empresa empresa) {
         this.empresa = empresa;
     }
 
-    public void setEstado(String estado) {
+    public void setEstado(Estado estado) {
         this.estado = estado;
     }
 
-    public void setTipoRiesgo(String tipoRiesgo) {
+    public void setTipoRiesgo(TipoRiesgo tipoRiesgo) {
         this.tipoRiesgo = tipoRiesgo;
     }
 
@@ -179,7 +205,7 @@ public class IperFormulario {
         this.descripcionRiesgo = descripcionRiesgo;
     }
 
-    public void setCausaRiesgo(String causaRiesgo) {
+    public void setCausaRiesgo(CausaRiesgo causaRiesgo) {
         this.causaRiesgo = causaRiesgo;
     }
 
@@ -187,11 +213,11 @@ public class IperFormulario {
         this.sector = sector;
     }
 
-    public void setCategoriaRiesgo(String categoriaRiesgo) {
+    public void setCategoriaRiesgo(CategoriaRiesgo categoriaRiesgo) {
         this.categoriaRiesgo = categoriaRiesgo;
     }
 
-    public void setNivelRiesgo(String nivelRiesgo) {
+    public void setNivelRiesgo(Severidad nivelRiesgo) {
         this.nivelRiesgo = nivelRiesgo;
     }
 
@@ -203,15 +229,15 @@ public class IperFormulario {
         this.descripcionMedidas = descripcionMedidas;
     }
 
-    public void setImpactoPotencialRiesgo(String impactoPotencialRiesgo) {
+    public void setImpactoPotencialRiesgo(Severidad impactoPotencialRiesgo) {
         this.impactoPotencialRiesgo = impactoPotencialRiesgo;
     }
 
-    public void setProbabilidadOcurrencia(String probabilidadOcurrencia) {
+    public void setProbabilidadOcurrencia(ProbabilidadPrioridad probabilidadOcurrencia) {
         this.probabilidadOcurrencia = probabilidadOcurrencia;
     }
 
-    public void setPrioridadRiesgo(String prioridadRiesgo) {
+    public void setPrioridadRiesgo(ProbabilidadPrioridad prioridadRiesgo) {
         this.prioridadRiesgo = prioridadRiesgo;
     }
 
@@ -231,7 +257,7 @@ public class IperFormulario {
         this.riesgoEliminado = riesgoEliminado;
     }
 
-    public void setImpactoResidual(String impactoResidual) {
+    public void setImpactoResidual(ProbabilidadPrioridad impactoResidual) {
         this.impactoResidual = impactoResidual;
     }
 
