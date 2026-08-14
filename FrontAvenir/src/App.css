@@ -1,0 +1,75 @@
+/* ==========================================
+   1. CONTENEDORES Y TARJETAS ENCUADRADAS
+   ========================================== */
+.main-content,
+.gestor-card,
+.empresa-card,
+.roles-card,
+.form-card,
+.card,
+.form-component,
+[class*="-container"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important; /* Mantiene las tablas adentro */
+}
+
+/* Reducción de padding en móviles */
+@media (max-width: 768px) {
+  .main-content,
+  .gestor-card,
+  .empresa-card,
+  .roles-card,
+  .card {
+    padding: 12px !important;
+  }
+
+  .gestor-table th,
+  .gestor-table td {
+    padding: 8px 6px !important;
+    font-size: 0.82rem;
+  }
+}
+
+/* ==========================================
+   2. ENVOLTORIO RESPONSIVO DE TABLAS
+   ========================================== */
+.table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  display: block !important;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+.table-responsive table {
+  width: 100%;
+  min-width: 480px; /* Ancho mínimo para scroll suave */
+  border-collapse: collapse;
+}
+
+.gestor-table td,
+.gestor-table th {
+  white-space: nowrap;
+}
+
+/* ==========================================
+   3. BARRA DE NAVEGACIÓN SUPERIOR (DESLIZABLE)
+   ========================================== */
+.nav-pills, header nav {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+  padding: 8px 5px !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-pills::-webkit-scrollbar {
+  display: none;
+}
