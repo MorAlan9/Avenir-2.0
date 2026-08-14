@@ -1,4 +1,11 @@
 package com.avenir.Avenir20.repository;
 
-public class CausaRiesgoRepository {
+import com.avenir.Avenir20.model.CausaRiesgo;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface CausaRiesgoRepository extends JpaRepository<CausaRiesgo, Integer> {
+    List<CausaRiesgo> findByEstadoTrue();
 }
