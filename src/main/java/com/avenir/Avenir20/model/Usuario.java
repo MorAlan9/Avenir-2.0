@@ -1,6 +1,8 @@
 package com.avenir.Avenir20.model;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuario")
@@ -29,6 +31,15 @@ public class Usuario {
     @ManyToOne(optional = true)
     @JoinColumn(name = "id_tipo_persona", nullable = true)
     private TipoPersona tipoPersona;
+
+    // 🌟 NUEVO: Permisos individuales por usuario (Overrides)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "usuario_permiso_especifico",
+            joinColumns = @JoinColumn(name = "id_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "id_permiso")
+    )
+    private Set<Permiso> permisosEspecificos = new HashSet<>();
 
     // 1. Constructor vacío
     public Usuario() {
@@ -104,5 +115,13 @@ public class Usuario {
 
     public Boolean isActivo() {
         return this.activo;
+    }
+
+    public Set<Permiso> getPermisosEspecificos() {
+        return permisosEspecificos;
+    }
+
+    public void setPermisosEspecificos(Set<Permiso> permisosEspecificos) {
+        this.permisosEspecificos = permisosEspecificos;
     }
 }

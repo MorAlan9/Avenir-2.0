@@ -14,10 +14,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import jakarta.xml.bind.DatatypeConverter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Component
@@ -35,7 +36,15 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             try {
-                Key signingKey = Keys.hmacShaKeyFor(DatatypeConverter.parseBase64Binary(key));
+                // 💡 Intenta decodificar en Base64; si es un String normal, usa UTF-8
+                byte[] keyBytes;
+                try {
+                    keyBytes = Base64.getDecoder().decode(key);
+                } catch (IllegalArgumentException e) {
+                    keyBytes = key.getBytes(StandardCharsets.UTF_8);
+                }
+
+                Key signingKey = Keys.hmacShaKeyFor(keyBytes);
 
                 Claims claims = Jwts.parserBuilder()
                         .setSigningKey(signingKey)
@@ -54,7 +63,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     // 1. Cargar permisos específicos
                     if (permisos != null) {
-                        permisos.forEach(p -> authorities.add(new SimpleGrantedAuthority(p.trim())));
+                        permisos.forEach(p -> {
+                            if (p != null) authorities.add(new SimpleGrantedAuthority(p.trim()));
+                        });
                     }
 
                     // 2. Si es Admin, asignamos la autoridad maestra
@@ -62,7 +73,7 @@ public class JwtFilter extends OncePerRequestFilter {
                         authorities.add(new SimpleGrantedAuthority("ROLE_ADMINISTRADOR"));
                     }
 
-                    // 3. 🌟 Asignar también la autoridad dinámica por nombre de rol (ej: ROLE_GERENTE)
+                    // 3. Asignar también la autoridad dinámica por nombre de rol
                     if (rol != null && !rol.trim().isEmpty()) {
                         authorities.add(new SimpleGrantedAuthority("ROLE_" + rol.trim().toUpperCase()));
                     }
@@ -73,7 +84,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
-                logger.error("Token no válido o expirado: " + e.getMessage());
+                logger.error("Token no válido o fallo en autenticación JWT: " + e.getMessage());
             }
         }
 

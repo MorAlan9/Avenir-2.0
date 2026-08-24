@@ -13,29 +13,66 @@ public class CausaRiesgo {
     @Column(nullable = false, length = 150)
     private String nombre;
 
+    // 🌟 Agregamos descripcion para solucionar la restricción NOT NULL de la BD
+    @Column(length = 255)
+    private String descripcion;
+
     @Column(nullable = false)
     private boolean estado = true;
 
+    // Constructores
     public CausaRiesgo() {}
 
     public CausaRiesgo(String nombre) {
         this.nombre = nombre;
+        this.descripcion = nombre; // Evita mandar nulo a PostgreSQL
         this.estado = true;
     }
 
-    public CausaRiesgo(Integer id, String nombre, boolean estado) {
+    public CausaRiesgo(String nombre, String descripcion) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.estado = true;
+    }
+
+    public CausaRiesgo(Integer id, String nombre, String descripcion, boolean estado) {
         this.id = id;
         this.nombre = nombre;
+        this.descripcion = descripcion;
         this.estado = estado;
     }
 
     // Getters
-    public Integer getId() { return id; }
-    public String getNombre() { return nombre; }
-    public boolean getEstado() { return estado; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public boolean getEstado() {
+        return estado;
+    }
 
     // Setters
-    public void setId(Integer id) { this.id = id; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setEstado(boolean estado) { this.estado = estado; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
+    }
 }

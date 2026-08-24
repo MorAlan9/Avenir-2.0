@@ -22,18 +22,24 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
-                        // 🌟 LA CLAVE DE TODO: Permitir consultas previas (CORS Preflight)
+                        // 🌟 Permitir consultas previas CORS (Preflight)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 🔓 RUTAS PÚBLICAS (Login, Permisos y REGISTRO PÚBLICO)
-                        .requestMatchers("/api/usuarios/login", "/api/roles/permisos").permitAll()
+                        // 🔓 RUTAS PÚBLICAS Y MANEJO DE ERRORES DEL SISTEMA
+                        .requestMatchers("/api/usuarios/login", "/api/roles/permisos", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
 
-                        // ⏰ HABILITAMOS MÉTODOS DE MODIFICACIÓN DE HORARIOS PARA AUTENTICADOS
-                        .requestMatchers(HttpMethod.PATCH, "/api/horas/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/horas/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/horas/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/horas/**").authenticated()
+                        // ⏰ HORARIOS
+                        .requestMatchers("/api/horas/**").authenticated()
+
+                        // ⚠️ MÓDULOS DE PARÁMETROS IPER
+                        .requestMatchers(
+                                "/api/tipo-riesgo/**",
+                                "/api/categoria-riesgo/**",
+                                "/api/causa-riesgo/**",
+                                "/api/estado/**",
+                                "/api/probabilidad-prioridad/**"
+                        ).authenticated()
 
                         // 🔒 Todo lo demás requiere estar autenticado
                         .anyRequest().authenticated()
