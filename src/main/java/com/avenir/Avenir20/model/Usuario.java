@@ -27,12 +27,23 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean activo = false;
 
+    // 📍 Campos de Geolocalización Estructurada
+    private String direccion;
+    private String pais;
+    private String provincia;
+    private String ciudad;
+    private String barrio;
+    private String calle;
+    private String numero;
+    private Double latitud;
+    private Double longitud;
+
     // 🌟 PLAN A APLICADO: Habilitamos valores nulos para el registro de usuarios estándar
     @ManyToOne(optional = true)
     @JoinColumn(name = "id_tipo_persona", nullable = true)
     private TipoPersona tipoPersona;
 
-    // 🌟 NUEVO: Permisos individuales por usuario (Overrides)
+    // 🌟 Permisos individuales por usuario (Overrides)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_permiso_especifico",
@@ -45,7 +56,7 @@ public class Usuario {
     public Usuario() {
     }
 
-    // 2. Constructor con todo
+    // 2. Constructor con parámetros principales
     public Usuario(String nombre, String apellido, String email, String contrasena, TipoPersona tipoPersona) {
         this.nombre = nombre;
         this.apellido = apellido;
@@ -105,16 +116,88 @@ public class Usuario {
         this.activo = activo;
     }
 
+    public Boolean isActivo() {
+        return this.activo;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
+
+    public String getProvincia() {
+        return provincia;
+    }
+
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
+    }
+
+    public String getCiudad() {
+        return ciudad;
+    }
+
+    public void setCiudad(String ciudad) {
+        this.ciudad = ciudad;
+    }
+
+    public String getBarrio() {
+        return barrio;
+    }
+
+    public void setBarrio(String barrio) {
+        this.barrio = barrio;
+    }
+
+    public String getCalle() {
+        return calle;
+    }
+
+    public void setCalle(String calle) {
+        this.calle = calle;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public void setNumero(String numero) {
+        this.numero = numero;
+    }
+
+    public Double getLatitud() {
+        return latitud;
+    }
+
+    public void setLatitud(Double latitud) {
+        this.latitud = latitud;
+    }
+
+    public Double getLongitud() {
+        return longitud;
+    }
+
+    public void setLongitud(Double longitud) {
+        this.longitud = longitud;
+    }
+
     public TipoPersona getTipoPersona() {
         return tipoPersona;
     }
 
     public void setTipoPersona(TipoPersona tipoPersona) {
         this.tipoPersona = tipoPersona;
-    }
-
-    public Boolean isActivo() {
-        return this.activo;
     }
 
     public Set<Permiso> getPermisosEspecificos() {
